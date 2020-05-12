@@ -1,7 +1,11 @@
+<form action="/todos" method="POST">
+  <input type="text" placeholder="新增todo" name="name">
+  <button type="submit">create</button>
+</form>
 <ul>
   {{#each todos}}
   <li>
-    {{this.name}}
+    {{name}}
   </li>
   {{/each}}
 </ul>
