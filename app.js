@@ -24,7 +24,7 @@ app.listen(port, () => {
   console.log(`The server is listening on http://localhost:${port}`)
 })
 
-// route setting 路由設定，將 Todo 資料傳入樣板
+// route setting 首頁路由設定，將 Todo 資料傳入樣板
 app.get('/', (req, res) => {
   Todo.find()
     .lean()
@@ -32,7 +32,7 @@ app.get('/', (req, res) => {
     .catch(error => console.error(error))
 })
 
-
+// 新增一筆資料
 app.post('/todos', (req, res) => {
   const name = req.body.name
   // 1.產生物件實例 > 將實例存入資料庫
@@ -41,5 +41,36 @@ app.post('/todos', (req, res) => {
   // 2.直接操作資料庫
   return Todo.create({ name })
     .then(() => res.redirect('/'))
+    .catch(error => console.log(error))
+})
+
+// 瀏覽特定資料頁面
+app.get('/todos/:id', (req, res) => {
+  const id = req.params.id
+  return Todo.findById(id)
+    .lean()
+    .then((todo) => res.render('detail', { todo }))
+    .catch(error => console.log(error))
+})
+
+// 修改特定資料
+// 1. 指定路由到編輯頁面
+app.get('/todos/:id/edit', (req, res) => {
+  const id = req.params.id
+  return Todo.findById(id)
+    .lean()
+    .then((todo) => res.render('edit', { todo }))
+    .catch(error => console.log(error))
+})
+// 2. 編輯頁面修改後 post 送出資料
+app.post('/todos/:id/edit', (req, res) => {
+  const id = req.params.id
+  const name = req.body.name
+  return Todo.findById(id)
+    .then(todo => {
+      todo.name = name
+      return todo.save()
+    })
+    .then(() => res.redirect(`/todos/${id}`))
     .catch(error => console.log(error))
 })
