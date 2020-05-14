@@ -6,8 +6,8 @@ const Todo = require('./models/todo')
 const app = express()
 const port = 3000
 const db = mongoose.connection
-// 設定 use 每筆資料都經過 body-parser
-app.use(bodyParser.urlencoded({ extended: true }))
+const methodOverride = require('method-override')
+
 // handlebars 樣板設定
 app.engine('handlebars', exphbs({ defaultLayout: 'main' }))
 app.set('view engine', 'handlebars')
@@ -23,11 +23,15 @@ db.once('open', () => {
 app.listen(port, () => {
   console.log(`The server is listening on http://localhost:${port}`)
 })
+// 設定 use 每筆資料都經過 body-parser, method-override
+app.use(bodyParser.urlencoded({ extended: true }))
+app.use(methodOverride('_method'))
 
 // 首頁路由設定，將 Todo 資料載入首頁樣板
 app.get('/', (req, res) => {
   Todo.find()
     .lean()
+    .sort({ _id: 'asc' })
     .then(todos => res.render('index', { todos }))
     .catch(error => console.error(error))
 })
@@ -63,7 +67,8 @@ app.get('/todos/:id/edit', (req, res) => {
     .catch(error => console.log(error))
 })
 // 2. 編輯頁面修改後 post 送出資料
-app.post('/todos/:id/edit', (req, res) => {
+//app.post('/todos/:id/edit', (req, res) => {
+app.put('/todos/:id', (req, res) => {
   const id = req.params.id
   // const name = req.body.name
   // const isDone = req.body.isDone
@@ -79,7 +84,8 @@ app.post('/todos/:id/edit', (req, res) => {
 })
 
 // 刪除特定資料：先找到確認資料庫有該筆資料然後執行刪除
-app.post('/todos/:id/delete', (req, res) => {
+// app.post('/todos/:id/delete', (req, res) => {
+app.delete('/todos/:id/', (req, res) => {
   const id = req.params.id
   return Todo.findById(id)
     .then(todo => todo.remove())
