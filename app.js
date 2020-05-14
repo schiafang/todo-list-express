@@ -24,7 +24,7 @@ app.listen(port, () => {
   console.log(`The server is listening on http://localhost:${port}`)
 })
 
-// route setting 首頁路由設定，將 Todo 資料傳入樣板
+// 首頁路由設定，將 Todo 資料載入首頁樣板
 app.get('/', (req, res) => {
   Todo.find()
     .lean()
@@ -65,10 +65,13 @@ app.get('/todos/:id/edit', (req, res) => {
 // 2. 編輯頁面修改後 post 送出資料
 app.post('/todos/:id/edit', (req, res) => {
   const id = req.params.id
-  const name = req.body.name
+  // const name = req.body.name
+  // const isDone = req.body.isDone
+  const { name, isDone } = req.body //解構賦值
   return Todo.findById(id)
     .then(todo => {
       todo.name = name
+      todo.isDone = isDone === 'on' ////等於 if/else 條件式，等號左右邊皆為布林值
       return todo.save()
     })
     .then(() => res.redirect(`/todos/${id}`))
